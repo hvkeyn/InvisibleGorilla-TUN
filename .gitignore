@@ -1,5 +1,7 @@
 /Files
 /InvisibleGorilla-TUN/bin
 /InvisibleGorilla-TUN/obj
+/publish
+/dist
 *.dll
 *.exe

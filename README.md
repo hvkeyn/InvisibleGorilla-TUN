@@ -21,25 +21,27 @@ InvisibleGorilla-TUN -port={port}
 ```powershell
 git clone "https://github.com/hvkeyn/InvisibleGorilla-TUN.git"
 cd InvisibleGorilla-TUN
+.\build.ps1
 ```
 
-Then:
+The script will automatically:
 
-1. Download [tun2socks](https://github.com/xjasonlyu/tun2socks/releases/latest) for your OS and extract it to `InvisibleGorilla-TUN/` and `TUN-Wrapper/`.
-   Rename the executable to `tun2socks.exe`.
-2. Download [wintun](https://www.wintun.net), extract it, and copy the correct `wintun.dll` to `InvisibleGorilla-TUN/` and `TUN-Wrapper/`.
-3. Build `tun.dll` and copy it to the project directory:
+- download `tun2socks.exe`
+- download `wintun.dll`
+- build `tun.dll` from `TUN-Wrapper`
+- publish the Windows service to `publish/`
+- create a release archive in `dist/`
+
+If you want a custom publish folder:
 
 ```powershell
-cd TUN-Wrapper
-go build --buildmode=c-shared -o tun.dll -trimpath -ldflags "-s -w -buildid=" .
-copy tun.dll ..\InvisibleGorilla-TUN
+.\build.ps1 -OutputDir .\artifacts\publish
 ```
 
-4. Run the service as administrator:
+Run the service as administrator:
 
 ```powershell
-dotnet run --project .\InvisibleGorilla-TUN\InvisibleGorilla-TUN.csproj -- -port={port}
+.\publish\InvisibleGorilla-TUN.exe -port={port}
 ```
 
 ## Service protocol
