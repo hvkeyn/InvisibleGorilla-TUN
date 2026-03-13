@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace InvisibleManTUN.Managers
+namespace InvisibleGorillaTUN.Managers
 {
     using Core;
     using Handlers;
@@ -9,7 +9,7 @@ namespace InvisibleManTUN.Managers
 
     public class ServiceManager
     {
-        private InvisibleManTunCore core;
+        private InvisibleGorillaTunCore core;
         private HandlersManager handlersManager;
         private Func<int> getPort;
 
@@ -46,7 +46,7 @@ namespace InvisibleManTUN.Managers
 
         private void RegisterCore()
         {
-            core = new InvisibleManTunCore();
+            core = new InvisibleGorillaTunCore();
         }
 
         private void RegisterHandlers()

@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Net.NetworkInformation;
 
-namespace InvisibleManTUN.Utilities
+namespace InvisibleGorillaTUN.Utilities
 {
     public class NetworkUtility
     {

@@ -1,4 +1,4 @@
-namespace InvisibleManTUN.Handlers.Profiles
+namespace InvisibleGorillaTUN.Handlers.Profiles
 {
     public interface IProfile
     {

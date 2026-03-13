@@ -1,30 +1,21 @@
 using System;
-using System.Linq;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
 
-namespace InvisibleManTUN.Handlers
+namespace InvisibleGorillaTUN.Handlers
 {
     using Foundation;
     using Values;
 
     public class SocketHandler : Handler
     {
-        private IPHostEntry hostEntry;
-        private IPAddress address;
         private IPEndPoint endPoint;
         private Socket listener;
 
         private Func<int> getPort;
         private Action<string, string, string, string, string> onStartTunneling;
         private Action onStopTunneling;
-
-        public SocketHandler()
-        {
-            this.hostEntry = Dns.GetHostEntry(Dns.GetHostName());
-            this.address = hostEntry.AddressList.First();
-        }
 
         public void Setup(
             Func<int> getPort, 
@@ -41,8 +32,8 @@ namespace InvisibleManTUN.Handlers
         {
             try
             {
-                endPoint = new IPEndPoint(address, getPort.Invoke());
-                listener = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                endPoint = new IPEndPoint(IPAddress.Loopback, getPort.Invoke());
+                listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
                 listener.Bind(endPoint);
                 listener.Listen(1);

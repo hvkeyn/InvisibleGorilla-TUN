@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Win32;
 
-namespace InvisibleManTUN.Handlers.Profiles
+namespace InvisibleGorillaTUN.Handlers.Profiles
 {
     public class WindowsProfile : IProfile
     {

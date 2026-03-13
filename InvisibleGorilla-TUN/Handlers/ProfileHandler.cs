@@ -1,4 +1,4 @@
-namespace InvisibleManTUN.Handlers
+namespace InvisibleGorillaTUN.Handlers
 {
     using Profiles;
 

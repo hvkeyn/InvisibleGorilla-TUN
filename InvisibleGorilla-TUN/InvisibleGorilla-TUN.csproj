@@ -3,12 +3,12 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
-    <RootNamespace>InvisibleManTUN</RootNamespace>
-    <AssemblyName>InvisibleMan-TUN</AssemblyName>
-    <Product>InvisibleMan-TUN</Product>
-    <PackageId>InvisibleMan-TUN</PackageId>
-    <Company>Invisible Man</Company>
-    <Copyright>Copyright (C) 2024 Invisible Man</Copyright>
+    <RootNamespace>InvisibleGorillaTUN</RootNamespace>
+    <AssemblyName>InvisibleGorilla-TUN</AssemblyName>
+    <Product>InvisibleGorilla-TUN</Product>
+    <PackageId>InvisibleGorilla-TUN</PackageId>
+    <Company>Invisible Gorilla</Company>
+    <Copyright>Copyright (C) 2024 Invisible Gorilla</Copyright>
     <Version>0.3.5.0</Version>
     <AssemblyVersion>0.3.5.0</AssemblyVersion>
     <ApplicationManifest>App.manifest</ApplicationManifest>

@@ -1,66 +1,70 @@
-# Invisible Man - TUN
+# Invisible Gorilla TUN
 
-> Tunneling service for Invisible Man applications (uses tun2socks and wintun)
+> Windows TUN service for `InvisibleGorilla-XRayClient`
 
-Invisible Man TUN is an open-source and free service that allows you to tunnel all of your system's traffic. It uses [tun2socks](https://github.com/xjasonlyu/tun2socks) and [wintun](https://www.wintun.net).
-<br/>
-This service creates the network interface and sets routes automatically.
+`Invisible Gorilla TUN` is the Windows tunneling companion service used by the client to create a virtual interface, route traffic through `tun2socks`, and manage system routes automatically.
 
-## Getting started
+## Quick start
 
-- If you just want to use this service: 
-  - Download it from [releases](https://github.com/InvisibleManVPN/InvisibleMan-TUN/releases/latest).
-  - Start the service by this instruction:
-    ```
-    InvisibleMan-TUN -port={port}
-    ```
+### Download release
 
-- But if you want to get the source of the service, follow these steps:
-  - Download the [requirements](#requirements)
-  - Clone a copy of the repository:
-    ```
-    git clone "https://github.com/InvisibleManVPN/InvisibleMan-TUN.git"
-    ```
-  - Change to the directory:
-    ```
-    cd InvisibleMan-TUN
-    ```
-  - Download one of the versions of [tun2socks](https://github.com/xjasonlyu/tun2socks/releases/latest) based on your OS and extract it to `/InvisibleMan-TUN` and `/TUN-Wrapper` directories.
-    <br/>
-    **NOTE:** After extracting the file, change its name to `tun2socks.exe`.
-  - Download [wintun](https://www.wintun.net), extract it and copy one of versions based on your OS to `/InvisibleMan-TUN` and `/TUN-Wrapper` directories.
-    <br/>
-    **NOTE:** Make sure the dll file name is `wintun.dll`.
-  - Make `tun.dll` file and copy to the `/InvisibleMan-TUN` directory:
-    ```
-    cd TUN-Wrapper
-    go build --buildmode=c-shared -o tun.dll -trimpath -ldflags "-s -w -buildid=" .
-    copy tun.dll ..\InvisibleMan-TUN
-    ```
-  - Run the project as administrator:
-    ```
-    dotnet run -port={port}
-    ```
+Download the latest binary from [Releases](https://github.com/hvkeyn/InvisibleGorilla-TUN/releases/latest).
 
-## Communicate with the service
+Run it as administrator:
 
-After running the service on a specific port, you need to connect to the service via a `socket`. So, you should open a `socket` to the chosen `port`. This is the port that allows your application and service to communicate with each other. Then you can use commands to control the service. Currently, we have two valid commands:
+```powershell
+InvisibleGorilla-TUN -port={port}
+```
 
-- `enable`: Enables the tunneling service and set a network interface.
-    ```
-    -command=enable -device={device} -proxy={ip}:{port} -address={address} -server={server} -dns={dns}
-    ```
-- `disable`: Disables the tunneling service and remove the network interface.
-    ```
-    -command=disable
-    ```
+### Build from source
+
+```powershell
+git clone "https://github.com/hvkeyn/InvisibleGorilla-TUN.git"
+cd InvisibleGorilla-TUN
+```
+
+Then:
+
+1. Download [tun2socks](https://github.com/xjasonlyu/tun2socks/releases/latest) for your OS and extract it to `InvisibleGorilla-TUN/` and `TUN-Wrapper/`.
+   Rename the executable to `tun2socks.exe`.
+2. Download [wintun](https://www.wintun.net), extract it, and copy the correct `wintun.dll` to `InvisibleGorilla-TUN/` and `TUN-Wrapper/`.
+3. Build `tun.dll` and copy it to the project directory:
+
+```powershell
+cd TUN-Wrapper
+go build --buildmode=c-shared -o tun.dll -trimpath -ldflags "-s -w -buildid=" .
+copy tun.dll ..\InvisibleGorilla-TUN
+```
+
+4. Run the service as administrator:
+
+```powershell
+dotnet run --project .\InvisibleGorilla-TUN\InvisibleGorilla-TUN.csproj -- -port={port}
+```
+
+## Service protocol
+
+The client communicates with the service over a local TCP socket on the selected port.
+
+Supported commands:
+
+- `enable`
+
+```text
+-command=enable -device={device} -proxy={ip}:{port} -address={address} -server={server} -dns={dns}
+```
+
+- `disable`
+
+```text
+-command=disable
+```
 
 ## Requirements
 
-- Go https://go.dev/dl/
-- .Net https://dotnet.microsoft.com/download
+- [Go](https://go.dev/dl/)
+- [.NET SDK](https://dotnet.microsoft.com/download)
 
-## Contacts
+## Related project
 
-- Web [invisiblemanvpn.github.io](https://invisiblemanvpn.github.io)
-- Email [invisiblemanvpn@gmail.com](mailto:invisiblemanvpn@gmail.com)
+- [InvisibleGorilla-XRayClient](https://github.com/hvkeyn/InvisibleGorilla-XRayClient)

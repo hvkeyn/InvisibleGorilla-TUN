@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 
-namespace InvisibleManTUN
+namespace InvisibleGorillaTUN
 {
     using Foundation;
     using Managers;
@@ -17,9 +17,9 @@ namespace InvisibleManTUN
 
             void PrintHeadLines()
             {
-                Console.WriteLine("Invisible Man TUN service");
+                Console.WriteLine("Invisible Gorilla TUN service");
                 Console.WriteLine($"version {GetCurrentReleaseVersion()}\n");
-                Console.WriteLine("usage: InvisibleMan-TUN -port={port}\n");
+                Console.WriteLine("usage: InvisibleGorilla-TUN -port={port}\n");
             }
 
             void InitializeServiceManager()

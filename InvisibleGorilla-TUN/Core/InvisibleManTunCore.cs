@@ -1,8 +1,8 @@
 using System;
 
-namespace InvisibleManTUN.Core
+namespace InvisibleGorillaTUN.Core
 {
-    public class InvisibleManTunCore
+    public class InvisibleGorillaTunCore
     {
         private Action onStartSocket;
 

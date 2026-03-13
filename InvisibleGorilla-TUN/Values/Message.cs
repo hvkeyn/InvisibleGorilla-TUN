@@ -1,4 +1,4 @@
-namespace InvisibleManTUN.Values
+namespace InvisibleGorillaTUN.Values
 {
     public static class Message
     {

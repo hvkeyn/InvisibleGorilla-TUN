@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace InvisibleManTUN.Managers
+namespace InvisibleGorillaTUN.Managers
 {
     using Handlers;
 

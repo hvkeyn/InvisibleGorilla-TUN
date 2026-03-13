@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace InvisibleManTUN.Handlers
+namespace InvisibleGorillaTUN.Handlers
 {
     using Foundation;
     using Handlers.Profiles;

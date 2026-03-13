@@ -1,4 +1,4 @@
-namespace InvisibleManTUN.Models
+namespace InvisibleGorillaTUN.Models
 {
     public class Flag
     {

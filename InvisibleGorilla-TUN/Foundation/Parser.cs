@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Collections.Generic;
 
-namespace InvisibleManTUN.Foundation
+namespace InvisibleGorillaTUN.Foundation
 {
     using Models;
 

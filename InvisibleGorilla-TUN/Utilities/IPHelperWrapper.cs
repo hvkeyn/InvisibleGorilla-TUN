@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 
-namespace InvisibleManTUN.Utilities
+namespace InvisibleGorillaTUN.Utilities
 {
     using Values;
 

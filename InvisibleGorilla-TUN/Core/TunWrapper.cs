@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace InvisibleManTUN.Core
+namespace InvisibleGorillaTUN.Core
 {
     using Values;
 
