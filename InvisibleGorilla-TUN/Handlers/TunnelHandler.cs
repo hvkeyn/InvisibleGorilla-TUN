@@ -45,9 +45,16 @@ namespace InvisibleGorillaTUN.Handlers
 
         public void Start(string device, string proxy, string address, string server, string dns)
         {
+            DiagnosticLog.Write(
+                "TunnelHandler",
+                $"Start requested: device={device}, proxy={proxy}, address={address}, server={server}, dns={dns}");
+
             try
             {
-                if (!IsTunnelRunning())
+                bool isRunning = IsTunnelRunning();
+                DiagnosticLog.Write("TunnelHandler", $"IsTunnelRunning before start={isRunning}");
+
+                if (!isRunning)
                 {
                     CleanupProfile();
                     StartTunnel();
@@ -58,9 +65,11 @@ namespace InvisibleGorillaTUN.Handlers
                 WaitUntilInterfaceAddressSet();
                 SetInterfaceDns();
                 SetRoutes();
+                DiagnosticLog.Write("TunnelHandler", "Start completed successfully");
             }
             catch(Exception ex)
             {
+                DiagnosticLog.WriteException("TunnelHandler.Start", ex);
                 Console.WriteLine(ex.Message);
                 return;
             }
@@ -72,52 +81,78 @@ namespace InvisibleGorillaTUN.Handlers
 
             void CleanupProfile()
             {
+                DiagnosticLog.Write("TunnelHandler", $"CleanupProfile for {device}");
                 getProfile.Invoke().CleanupProfiles(device);
             }
 
             void StartTunnel()
             {
+                DiagnosticLog.Write("TunnelHandler", "Starting tunnel task");
                 new Task(() => {
-                    onStartTunnel.Invoke(device, proxy);
+                    try
+                    {
+                        DiagnosticLog.Write("TunnelHandler", $"onStartTunnel invoke: device={device}, proxy={proxy}");
+                        onStartTunnel.Invoke(device, proxy);
+                        DiagnosticLog.Write("TunnelHandler", "onStartTunnel returned");
+                    }
+                    catch (Exception ex)
+                    {
+                        DiagnosticLog.WriteException("TunnelHandler.StartTunnelTask", ex);
+                    }
                 }).Start();
             }
 
             void WaitUntilInterfaceCreated()
             {
+                DiagnosticLog.Write("TunnelHandler", $"Waiting until interface exists: {device}");
                 scheduler.WaitUntil(
                     condition: IsInterfaceExists,
                     millisecondsTimeout: 6000,
                     $"Device with the name '{device}' was not found."
                 );
+                DiagnosticLog.Write("TunnelHandler", $"Interface exists: {device}");
             }
 
             void SetInterfaceAddress()
             {
+                DiagnosticLog.Write("TunnelHandler", $"Setting interface address: device={device}, address={address}");
                 onSetInterfaceAddress.Invoke(device, address);
+                DiagnosticLog.Write("TunnelHandler", "SetInterfaceAddress returned");
             }
 
             void WaitUntilInterfaceAddressSet()
             {
+                DiagnosticLog.Write("TunnelHandler", $"Waiting until interface address is set: {address}");
                 scheduler.WaitUntil(
                     condition: IsInterfaceAddressWasSet,
                     millisecondsTimeout: 6000,
                     $"'{address}' was not set to '{device}' device."
                 );
+                DiagnosticLog.Write("TunnelHandler", $"Interface address confirmed: {address}");
             }
 
             void SetInterfaceDns()
             {
+                DiagnosticLog.Write("TunnelHandler", $"Setting interface DNS: device={device}, dns={dns}");
                 onSetInterfaceDns.Invoke(device, dns);
+                DiagnosticLog.Write("TunnelHandler", "SetInterfaceDns returned");
             }
 
             void SetRoutes()
             {
+                string gateway = NetworkUtility.GetDefaultGateway(address);
+                int index = NetworkUtility.GetNetworkInterfaceIndex(device);
+                DiagnosticLog.Write(
+                    "TunnelHandler",
+                    $"Setting routes: server={server}, address={address}, gateway={gateway}, index={index}");
+
                 onSetRoutes.Invoke(
                     server, 
                     address, 
-                    NetworkUtility.GetDefaultGateway(address), 
-                    NetworkUtility.GetNetworkInterfaceIndex(device)
+                    gateway, 
+                    index
                 );
+                DiagnosticLog.Write("TunnelHandler", "SetRoutes returned");
             }
 
             bool IsInterfaceExists() => NetworkUtility.IsInterfaceExists(device);
@@ -127,7 +162,9 @@ namespace InvisibleGorillaTUN.Handlers
 
         public void Stop()
         {
+            DiagnosticLog.Write("TunnelHandler", "Stop requested");
             onStopTunnel.Invoke();
+            DiagnosticLog.Write("TunnelHandler", "Stop returned");
         }
     }
 }

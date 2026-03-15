@@ -4,6 +4,7 @@ using System.Threading;
 namespace InvisibleGorillaTUN.Managers
 {
     using Core;
+    using Foundation;
     using Handlers;
     using Values;
 
@@ -23,6 +24,7 @@ namespace InvisibleGorillaTUN.Managers
 
         public void Initialize()
         {
+            DiagnosticLog.Write("ServiceManager", "Initialize start");
             AvoidRunningMultipleInstances();
 
             RegisterCore();
@@ -32,13 +34,16 @@ namespace InvisibleGorillaTUN.Managers
             SetupCore();
 
             StartService();
+            DiagnosticLog.Write("ServiceManager", "Initialize completed");
         }
 
         private void AvoidRunningMultipleInstances()
         {
             mutex = new Mutex(true, APP_GUID, out bool isCreatedNew);
+            DiagnosticLog.Write("ServiceManager", $"Mutex createdNew={isCreatedNew}");
             if(!isCreatedNew)
             {
+                DiagnosticLog.Write("ServiceManager", "Another service instance is already running");
                 Console.WriteLine(Message.SERVICE_ALREADY_RUNNING);
                 Environment.Exit(1);
             }
@@ -46,11 +51,13 @@ namespace InvisibleGorillaTUN.Managers
 
         private void RegisterCore()
         {
+            DiagnosticLog.Write("ServiceManager", "RegisterCore");
             core = new InvisibleGorillaTunCore();
         }
 
         private void RegisterHandlers()
         {
+            DiagnosticLog.Write("ServiceManager", "RegisterHandlers");
             handlersManager = new HandlersManager();
 
             handlersManager.AddHandler(new SocketHandler());
@@ -60,6 +67,7 @@ namespace InvisibleGorillaTUN.Managers
 
         private void SetupHandlers()
         {
+            DiagnosticLog.Write("ServiceManager", "SetupHandlers");
             TunnelHandler tunnelHandler = handlersManager.GetHandler<TunnelHandler>();
             SocketHandler socketHandler = handlersManager.GetHandler<SocketHandler>();
             ProfileHandler profileHandler = handlersManager.GetHandler<ProfileHandler>();
@@ -69,6 +77,7 @@ namespace InvisibleGorillaTUN.Managers
 
             void SetupSocketHandler()
             {
+                DiagnosticLog.Write("ServiceManager", "Setup SocketHandler");
                 socketHandler.Setup(
                     getPort: getPort,
                     onStartTunneling: tunnelHandler.Start,
@@ -78,6 +87,7 @@ namespace InvisibleGorillaTUN.Managers
 
             void SetupTunnelHandler()
             {
+                DiagnosticLog.Write("ServiceManager", "Setup TunnelHandler");
                 tunnelHandler.Setup(
                     onStopTunnel: core.StopTunnel,
                     onStartTunnel: core.StartTunnel,
@@ -92,6 +102,7 @@ namespace InvisibleGorillaTUN.Managers
 
         private void SetupCore()
         {
+            DiagnosticLog.Write("ServiceManager", "SetupCore");
             SocketHandler socketHandler = handlersManager.GetHandler<SocketHandler>();
 
             core.Setup(
@@ -101,6 +112,7 @@ namespace InvisibleGorillaTUN.Managers
 
         private void StartService()
         {
+            DiagnosticLog.Write("ServiceManager", $"StartService port={getPort.Invoke()}");
             core.Start();
         }
     }

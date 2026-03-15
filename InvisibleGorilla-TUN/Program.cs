@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Security.Principal;
 
 namespace InvisibleGorillaTUN
 {
@@ -12,6 +13,13 @@ namespace InvisibleGorillaTUN
     {
         private static void Main(string[] args)
         {
+            DiagnosticLog.Clear();
+            DiagnosticLog.Write("Program", $"Service boot args: {string.Join(" ", args ?? Array.Empty<string>())}");
+            DiagnosticLog.Write("Program", $"BaseDirectory={AppDomain.CurrentDomain.BaseDirectory}");
+            DiagnosticLog.Write("Program", $"CurrentDirectory={System.IO.Directory.GetCurrentDirectory()}");
+            DiagnosticLog.Write("Program", $"IsAdministrator={IsAdministrator()}");
+            LogRuntimeFiles();
+
             PrintHeadLines();
             InitializeServiceManager();
 
@@ -24,6 +32,7 @@ namespace InvisibleGorillaTUN
 
             void InitializeServiceManager()
             {
+                DiagnosticLog.Write("Program", "Creating ServiceManager");
                 ServiceManager serviceManager = new ServiceManager(GetPort);
                 serviceManager.Initialize();
             }
@@ -40,18 +49,43 @@ namespace InvisibleGorillaTUN
                 parser.Parse(args);
 
                 if (!IsPortFlagExists())
+                {
+                    DiagnosticLog.Write("Program", "Port flag was not provided");
                     return -1;
+                }
 
                 try
                 {
-                    return Convert.ToInt32(parser.GetFlag(Global.PORT).Value);
+                    int port = Convert.ToInt32(parser.GetFlag(Global.PORT).Value);
+                    DiagnosticLog.Write("Program", $"Parsed port={port}");
+                    return port;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    DiagnosticLog.WriteException("Program.GetPort", ex);
                     return -1;
                 }
 
                 bool IsPortFlagExists() => parser.GetFlag(Global.PORT) != null;
+            }
+
+            void LogRuntimeFiles()
+            {
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string[] files = { "tun.dll", "tun2socks.exe", "wintun.dll" };
+
+                foreach (string file in files)
+                {
+                    string fullPath = System.IO.Path.Combine(baseDir, file);
+                    DiagnosticLog.Write("Program", $"{file} exists={System.IO.File.Exists(fullPath)} path={fullPath}");
+                }
+            }
+
+            bool IsAdministrator()
+            {
+                using WindowsIdentity identity = WindowsIdentity.GetCurrent();
+                WindowsPrincipal principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
             }
         }
     }

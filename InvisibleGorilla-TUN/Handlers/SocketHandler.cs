@@ -33,24 +33,31 @@ namespace InvisibleGorillaTUN.Handlers
         {
             try
             {
-                endPoint = new IPEndPoint(IPAddress.Loopback, getPort.Invoke());
+                int port = getPort.Invoke();
+                DiagnosticLog.Write("SocketHandler", $"Start requested on 127.0.0.1:{port}");
+
+                endPoint = new IPEndPoint(IPAddress.Loopback, port);
                 listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
                 listener.Bind(endPoint);
                 listener.Listen(1);
+                DiagnosticLog.Write("SocketHandler", "Listener bound and listening");
 
                 Console.WriteLine(Message.WAITING_FOR_CONNECTION);
                 Socket clientSocket = listener.Accept();
+                DiagnosticLog.Write("SocketHandler", $"Client connected from {clientSocket.RemoteEndPoint}");
 
                 Console.WriteLine(Message.CLIENT_WAS_CONNECTED);
                 Listen(clientSocket);
             }
             catch (Exception ex)
             {
+                DiagnosticLog.WriteException("SocketHandler.Start", ex);
                 Console.WriteLine(ex.Message);
             }
             finally
             {
+                DiagnosticLog.Write("SocketHandler", "Invoking onStopTunneling from Start finally");
                 onStopTunneling.Invoke();
             }
 
@@ -72,9 +79,11 @@ namespace InvisibleGorillaTUN.Handlers
                                 break;
                         }
 
+                        DiagnosticLog.Write("SocketHandler", $"Raw command: {command}");
                         Console.WriteLine($"Receive command: '{command}'");
                         string latestCommand = FetchLatestCommand();
                         
+                        DiagnosticLog.Write("SocketHandler", $"Latest command: {latestCommand}");
                         Console.WriteLine($"Execute command: '{latestCommand}'");
                         Execute(latestCommand);
 
@@ -91,6 +100,7 @@ namespace InvisibleGorillaTUN.Handlers
                 }
                 catch(Exception ex)
                 {
+                    DiagnosticLog.WriteException("SocketHandler.Listen", ex);
                     Console.WriteLine(ex.Message);
                 }
 
@@ -107,6 +117,7 @@ namespace InvisibleGorillaTUN.Handlers
             void Execute(string command)
             {
                 string firstArgument = command.Split(" ").FirstOrDefault();
+                DiagnosticLog.Write("SocketHandler", $"Execute firstArgument={firstArgument}");
 
                 switch(firstArgument)
                 {
@@ -122,6 +133,7 @@ namespace InvisibleGorillaTUN.Handlers
 
                 void Enable()
                 {
+                    DiagnosticLog.Write("SocketHandler", "Enable command parsing started");
                     Parser parser = new Parser(new[] {
                         Global.COMMAND,
                         Global.DEVICE,
@@ -132,6 +144,14 @@ namespace InvisibleGorillaTUN.Handlers
                     });
 
                     parser.Parse(command);
+                    DiagnosticLog.Write(
+                        "SocketHandler",
+                        $"Enable parsed device={parser.GetFlag(Global.DEVICE)?.Value}, " +
+                        $"proxy={parser.GetFlag(Global.PROXY)?.Value}, " +
+                        $"address={parser.GetFlag(Global.ADDRESS)?.Value}, " +
+                        $"server={parser.GetFlag(Global.SERVER)?.Value}, " +
+                        $"dns={parser.GetFlag(Global.DNS)?.Value}"
+                    );
 
                     onStartTunneling.Invoke(
                       parser.GetFlag(Global.DEVICE).Value,
@@ -140,10 +160,12 @@ namespace InvisibleGorillaTUN.Handlers
                       parser.GetFlag(Global.SERVER).Value,
                       parser.GetFlag(Global.DNS).Value  
                     );
+                    DiagnosticLog.Write("SocketHandler", "Enable command finished");
                 }
 
                 void Disable()
                 {
+                    DiagnosticLog.Write("SocketHandler", "Disable command received");
                     onStopTunneling.Invoke();
                 }
             }
