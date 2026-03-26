@@ -1,8 +1,16 @@
 # Invisible Gorilla TUN
 
-> Windows TUN service for `InvisibleGorilla-XRayClient`
+> Windows-only TUN service for `InvisibleGorilla-XRayClient`
 
 `Invisible Gorilla TUN` is the Windows tunneling companion service used by the client to create a virtual interface, route traffic through `tun2socks`, and manage system routes automatically.
+
+## Platform scope
+
+This repository is intentionally **Windows-only**.
+
+- Windows desktop: this repository provides the companion TUN service used by `InvisibleGorilla-XRayClient`.
+- Android: mobile support is being implemented in the client repository through an Android head and `VpnService` groundwork.
+- This repository should not be treated as the Android VPN runtime, because it depends on Windows-specific APIs, Wintun, and desktop process management.
 
 ## Quick start
 
