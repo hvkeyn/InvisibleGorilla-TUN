@@ -61,8 +61,10 @@ Supported commands:
 - `enable`
 
 ```text
--command=enable -device={device} -proxy={ip}:{port} -address={address} -server={server} -dns={dns}
+-command=enable -device={device} -proxy={ip}:{port} -address={address} -server={server} -dns={dns} [-bypassApps={base64-utf8-lines}]
 ```
+
+`-bypassApps` is optional. The payload is a base64-encoded UTF-8 text block where each line is a normalized `.exe` path that should be treated as an excluded application by downstream routing helpers. The service logs accepted/rejected entries and writes the active set into `active-bypass-apps.txt` next to the executable for diagnostics and native-helper handoff.
 
 - `disable`
 

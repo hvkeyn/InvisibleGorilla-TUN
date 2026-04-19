@@ -9,5 +9,6 @@ namespace InvisibleGorillaTUN.Values
         public const string ADDRESS = "-address";
         public const string SERVER = "-server";
         public const string DNS = "-dns";
+        public const string APP_RULES = "-appRules";
     }
 }

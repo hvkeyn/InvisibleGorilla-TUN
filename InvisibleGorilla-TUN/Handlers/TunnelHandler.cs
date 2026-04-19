@@ -43,14 +43,15 @@ namespace InvisibleGorillaTUN.Handlers
             this.getProfile = getProfile;
         }
 
-        public void Start(string device, string proxy, string address, string server, string dns)
+        public void Start(string device, string proxy, string address, string server, string dns, string appRulesPayload)
         {
             DiagnosticLog.Write(
                 "TunnelHandler",
-                $"Start requested: device={device}, proxy={proxy}, address={address}, server={server}, dns={dns}");
+                $"Start requested: device={device}, proxy={proxy}, address={address}, server={server}, dns={dns}, hasAppRules={(!string.IsNullOrWhiteSpace(appRulesPayload)).ToString()}");
 
             try
             {
+                AppRulesHandler.ApplyEncodedPayload(appRulesPayload);
                 bool isRunning = IsTunnelRunning();
                 DiagnosticLog.Write("TunnelHandler", $"IsTunnelRunning before start={isRunning}");
 
@@ -163,6 +164,7 @@ namespace InvisibleGorillaTUN.Handlers
         public void Stop()
         {
             DiagnosticLog.Write("TunnelHandler", "Stop requested");
+            AppRulesHandler.Clear();
             onStopTunnel.Invoke();
             DiagnosticLog.Write("TunnelHandler", "Stop returned");
         }

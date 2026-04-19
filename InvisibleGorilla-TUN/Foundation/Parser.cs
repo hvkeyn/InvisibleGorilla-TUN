@@ -29,9 +29,13 @@ namespace InvisibleGorillaTUN.Foundation
 
             foreach(string argument in arguments)
             {
-                string[] flag = argument.Split("=");
-                string key = flag.First();
-                string value = flag.Last();
+                int separatorIndex = argument.IndexOf('=');
+                string key = separatorIndex >= 0
+                    ? argument.Substring(0, separatorIndex)
+                    : argument;
+                string value = separatorIndex >= 0 && separatorIndex < argument.Length - 1
+                    ? argument.Substring(separatorIndex + 1)
+                    : "";
 
                 if (IsEmptyFlag(key))
                     continue;

@@ -15,12 +15,12 @@ namespace InvisibleGorillaTUN.Handlers
         private Socket listener;
 
         private Func<int> getPort;
-        private Action<string, string, string, string, string> onStartTunneling;
+        private Action<string, string, string, string, string, string> onStartTunneling;
         private Action onStopTunneling;
 
         public void Setup(
             Func<int> getPort, 
-            Action<string, string, string, string, string> onStartTunneling, 
+            Action<string, string, string, string, string, string> onStartTunneling, 
             Action onStopTunneling
         )
         {
@@ -140,7 +140,8 @@ namespace InvisibleGorillaTUN.Handlers
                         Global.PROXY,
                         Global.ADDRESS,
                         Global.SERVER,
-                        Global.DNS
+                        Global.DNS,
+                        Global.APP_RULES
                     });
 
                     parser.Parse(command);
@@ -150,7 +151,8 @@ namespace InvisibleGorillaTUN.Handlers
                         $"proxy={parser.GetFlag(Global.PROXY)?.Value}, " +
                         $"address={parser.GetFlag(Global.ADDRESS)?.Value}, " +
                         $"server={parser.GetFlag(Global.SERVER)?.Value}, " +
-                        $"dns={parser.GetFlag(Global.DNS)?.Value}"
+                        $"dns={parser.GetFlag(Global.DNS)?.Value}, " +
+                        $"hasAppRules={(!string.IsNullOrWhiteSpace(parser.GetFlag(Global.APP_RULES)?.Value)).ToString()}"
                     );
 
                     onStartTunneling.Invoke(
@@ -158,7 +160,8 @@ namespace InvisibleGorillaTUN.Handlers
                       parser.GetFlag(Global.PROXY).Value,
                       parser.GetFlag(Global.ADDRESS).Value,
                       parser.GetFlag(Global.SERVER).Value,
-                      parser.GetFlag(Global.DNS).Value  
+                      parser.GetFlag(Global.DNS).Value,
+                      parser.GetFlag(Global.APP_RULES)?.Value ?? string.Empty
                     );
                     DiagnosticLog.Write("SocketHandler", "Enable command finished");
                 }
