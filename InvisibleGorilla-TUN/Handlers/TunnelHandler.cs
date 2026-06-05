@@ -51,7 +51,50 @@ namespace InvisibleGorillaTUN.Handlers
 
             try
             {
-                AppRulesHandler.ApplyEncodedPayload(appRulesPayload);
+                ActiveAppRules activeRules = AppRulesHandler.ApplyEncodedPayload(appRulesPayload);
+
+                bool wantsSplitTunnel =
+                    !string.Equals(activeRules.Mode, "ALL_APPS", StringComparison.OrdinalIgnoreCase)
+                    && activeRules.Apps.Length > 0;
+
+                if (wantsSplitTunnel && SingBoxEngine.IsAvailable())
+                {
+                    DiagnosticLog.Write(
+                        "TunnelHandler",
+                        $"Per-app split tunnel requested: mode={activeRules.Mode}, apps={activeRules.Apps.Length}. Starting sing-box engine.");
+
+                    bool splitStarted = SingBoxEngine.Start(
+                        device: device,
+                        address: address,
+                        dns: dns,
+                        proxy: proxy,
+                        serverIp: server,
+                        mode: activeRules.Mode,
+                        apps: activeRules.Apps);
+
+                    if (splitStarted)
+                    {
+                        WaitUntilInterfaceCreated();
+
+                        if (SingBoxEngine.VerifyLocalSocksProxy(proxy))
+                        {
+                            DiagnosticLog.Write("TunnelHandler", "Split tunnel (sing-box) start completed successfully");
+                            return;
+                        }
+
+                        DiagnosticLog.Write(
+                            "TunnelHandler",
+                            "sing-box started but local xray SOCKS is unreachable; falling back to full tunnel.");
+                        SingBoxEngine.Stop();
+                    }
+                    else
+                    {
+                        DiagnosticLog.Write(
+                            "TunnelHandler",
+                            "sing-box engine failed to start; falling back to the regular full tunnel.");
+                    }
+                }
+
                 bool isRunning = IsTunnelRunning();
                 DiagnosticLog.Write("TunnelHandler", $"IsTunnelRunning before start={isRunning}");
 
@@ -165,7 +208,15 @@ namespace InvisibleGorillaTUN.Handlers
         {
             DiagnosticLog.Write("TunnelHandler", "Stop requested");
             AppRulesHandler.Clear();
-            onStopTunnel.Invoke();
+
+            // Stop the split-tunnel engine first (no-op when it was never started).
+            SingBoxEngine.Stop();
+
+            // Only tear down tun2socks when it was actually running; calling the
+            // native stop with no process would fault.
+            if (isTunnelRunning.Invoke())
+                onStopTunnel.Invoke();
+
             DiagnosticLog.Write("TunnelHandler", "Stop returned");
         }
     }

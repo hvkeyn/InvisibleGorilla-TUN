@@ -8,6 +8,13 @@ namespace InvisibleGorillaTUN.Handlers
 {
     using Foundation;
 
+    /// <summary>
+    /// Result of decoding/validating the app-rules payload sent by the client.
+    /// Mode is one of ALL_APPS, BYPASS_SELECTED_APPS, ONLY_SELECTED_APPS.
+    /// Apps are validated, existing, distinct executable paths.
+    /// </summary>
+    internal sealed record ActiveAppRules(string Mode, string[] Apps);
+
     internal static class AppRulesHandler
     {
         private const string DefaultMode = "ALL_APPS";
@@ -18,7 +25,7 @@ namespace InvisibleGorillaTUN.Handlers
 
         private sealed record DecodedAppRulesPayload(string Mode, string[] RequestedApps);
 
-        public static void ApplyEncodedPayload(string? encodedPayload)
+        public static ActiveAppRules ApplyEncodedPayload(string? encodedPayload)
         {
             lock (SyncRoot)
             {
@@ -49,6 +56,8 @@ namespace InvisibleGorillaTUN.Handlers
                     .Concat(acceptedApps)
                     .ToArray();
                 File.WriteAllLines(ActiveRulesPath, stagedLines, Encoding.UTF8);
+
+                return new ActiveAppRules(payload.Mode, acceptedApps);
             }
         }
 
