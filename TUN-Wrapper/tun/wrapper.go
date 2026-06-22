@@ -4,6 +4,7 @@ import (
 	"C"
 	"fmt"
 	"os/exec"
+	"strings"
 	"syscall"
 
 	"golang.org/x/sys/windows"
@@ -12,7 +13,7 @@ import (
 var cmd *exec.Cmd
 
 //export StartTunnel
-func StartTunnel(device *C.char, proxy *C.char) {
+func StartTunnel(device *C.char, proxy *C.char, bindInterface *C.char) {
 	if IsTunnelRunning() {
 		return
 	}
@@ -20,6 +21,12 @@ func StartTunnel(device *C.char, proxy *C.char) {
 	args := []string{
 		"-device", C.GoString(device),
 		"-proxy", C.GoString(proxy),
+	}
+
+	if iface := strings.TrimSpace(C.GoString(bindInterface)); iface != "" {
+		// Keep SOCKS traffic on the physical NIC so localhost xray does not loop
+		// back through the TUN default routes after they are installed.
+		args = append(args, "-interface", iface)
 	}
 
 	cmd = exec.Command("./tun2socks", args...)
@@ -33,6 +40,7 @@ func StartTunnel(device *C.char, proxy *C.char) {
 
 	if err != nil {
 		fmt.Println("error | failed to start tun2socks >", err)
+		cmd = nil
 		return
 	}
 
@@ -41,6 +49,11 @@ func StartTunnel(device *C.char, proxy *C.char) {
 
 //export StopTunnel
 func StopTunnel() {
+	if cmd == nil || cmd.Process == nil {
+		cmd = nil
+		return
+	}
+
 	dll, err := windows.LoadDLL("kernel32.dll")
 	if err != nil {
 		fmt.Println("error | failed to load dll >", err)
@@ -86,7 +99,12 @@ func StopTunnel() {
 
 //export IsTunnelRunning
 func IsTunnelRunning() bool {
-	if cmd == nil {
+	if cmd == nil || cmd.Process == nil {
+		return false
+	}
+
+	if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
+		cmd = nil
 		return false
 	}
 

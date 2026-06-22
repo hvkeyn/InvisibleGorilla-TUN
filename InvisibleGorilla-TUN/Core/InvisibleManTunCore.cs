@@ -19,10 +19,10 @@ namespace InvisibleGorillaTUN.Core
             onStartSocket.Invoke();
         }
 
-        public void StartTunnel(string device, string proxy)
+        public void StartTunnel(string device, string proxy, string bindInterface)
         {
-            DiagnosticLog.Write("TunCore", $"StartTunnel device={device}, proxy={proxy}");
-            TunWrapper.StartTunnel(device, proxy);
+            DiagnosticLog.Write("TunCore", $"StartTunnel device={device}, proxy={proxy}, bindInterface={bindInterface}");
+            TunWrapper.StartTunnel(device, proxy, bindInterface);
             DiagnosticLog.Write("TunCore", "StartTunnel returned");
         }
 

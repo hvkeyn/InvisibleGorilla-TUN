@@ -12,7 +12,7 @@ namespace InvisibleGorillaTUN.Handlers
         private Scheduler scheduler;
 
         private Action onStopTunnel;
-        private Action<string, string> onStartTunnel;
+        private Action<string, string, string> onStartTunnel;
         private Action<string, string> onSetInterfaceAddress;
         private Action<string, string> onSetInterfaceDns;
         private Action<string, string, string, int> onSetRoutes;
@@ -26,7 +26,7 @@ namespace InvisibleGorillaTUN.Handlers
 
         public void Setup(
             Action onStopTunnel,
-            Action<string, string> onStartTunnel,
+            Action<string, string, string> onStartTunnel,
             Action<string, string> onSetInterfaceAddress,
             Action<string, string> onSetInterfaceDns,
             Action<string, string, string, int> onSetRoutes,
@@ -49,8 +49,28 @@ namespace InvisibleGorillaTUN.Handlers
                 "TunnelHandler",
                 $"Start requested: device={device}, proxy={proxy}, address={address}, server={server}, dns={dns}, hasAppRules={(!string.IsNullOrWhiteSpace(appRulesPayload)).ToString()}");
 
+            string? physicalGateway = null;
+            string? bindInterface = null;
+
             try
             {
+                // Resolve the physical uplink before the TUN adapter gets an address. Using the
+                // TUN IP here would make GetBestInterface pick the virtual adapter and return
+                // an empty gateway, so the VPN-server bypass route never gets installed.
+                physicalGateway =
+                    NetworkUtility.TryGetDefaultGateway(server)
+                    ?? NetworkUtility.TryGetDefaultGateway("1.1.1.1");
+                bindInterface =
+                    NetworkUtility.TryGetInterfaceName(server)
+                    ?? NetworkUtility.TryGetInterfaceName("1.1.1.1");
+
+                DiagnosticLog.Write(
+                    "TunnelHandler",
+                    $"Physical uplink: gateway={physicalGateway ?? "(none)"}, interface={bindInterface ?? "(none)"}");
+
+                if (string.IsNullOrWhiteSpace(physicalGateway))
+                    throw new InvalidOperationException("Could not resolve the physical default gateway for TUN routing.");
+
                 ActiveAppRules activeRules = AppRulesHandler.ApplyEncodedPayload(appRulesPayload);
 
                 bool wantsSplitTunnel =
@@ -135,8 +155,8 @@ namespace InvisibleGorillaTUN.Handlers
                 new Task(() => {
                     try
                     {
-                        DiagnosticLog.Write("TunnelHandler", $"onStartTunnel invoke: device={device}, proxy={proxy}");
-                        onStartTunnel.Invoke(device, proxy);
+                        DiagnosticLog.Write("TunnelHandler", $"onStartTunnel invoke: device={device}, proxy={proxy}, bindInterface={bindInterface ?? "(none)"}");
+                        onStartTunnel.Invoke(device, proxy, bindInterface ?? string.Empty);
                         DiagnosticLog.Write("TunnelHandler", "onStartTunnel returned");
                     }
                     catch (Exception ex)
@@ -184,16 +204,15 @@ namespace InvisibleGorillaTUN.Handlers
 
             void SetRoutes()
             {
-                string gateway = NetworkUtility.GetDefaultGateway(address);
                 int index = NetworkUtility.GetNetworkInterfaceIndex(device);
                 DiagnosticLog.Write(
                     "TunnelHandler",
-                    $"Setting routes: server={server}, address={address}, gateway={gateway}, index={index}");
+                    $"Setting routes: server={server}, address={address}, gateway={physicalGateway}, index={index}");
 
                 onSetRoutes.Invoke(
-                    server, 
-                    address, 
-                    gateway, 
+                    server,
+                    address,
+                    physicalGateway!,
                     index
                 );
                 DiagnosticLog.Write("TunnelHandler", "SetRoutes returned");

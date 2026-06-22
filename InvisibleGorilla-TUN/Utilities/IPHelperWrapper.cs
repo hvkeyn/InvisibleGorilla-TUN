@@ -58,5 +58,36 @@ namespace InvisibleGorillaTUN.Utilities
 
             return null;
         }
+
+        public static string? TryGetInterfaceNameForDestination(string destinationAddress)
+        {
+            UInt32 destaddr = BitConverter.ToUInt32(
+                value: IPAddress.Parse(destinationAddress).GetAddressBytes(),
+                startIndex: 0
+            );
+
+            uint interfaceIndex;
+            int result = GetBestInterface(destaddr, out interfaceIndex);
+            if (result != 0)
+                return null;
+
+            foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (ni.OperationalStatus != OperationalStatus.Up)
+                    continue;
+
+                IPInterfaceProperties niprops = ni.GetIPProperties();
+                if (niprops == null || !ni.Supports(NetworkInterfaceComponent.IPv4))
+                    continue;
+
+                IPv4InterfaceProperties? v4props = niprops.GetIPv4Properties();
+                if (v4props == null || v4props.Index != interfaceIndex)
+                    continue;
+
+                return ni.Name;
+            }
+
+            return null;
+        }
     }
 }
