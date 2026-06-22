@@ -32,6 +32,24 @@ namespace InvisibleGorillaTUN.Utilities
             return IPHelperWrapper.GetGatewayForDestination(address);
         }
 
+        public static string? TryGetDefaultGateway(string destinationAddress)
+        {
+            try
+            {
+                string? gateway = IPHelperWrapper.GetGatewayForDestination(destinationAddress);
+                return string.IsNullOrWhiteSpace(gateway) ? null : gateway;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public static string? TryGetInterfaceName(string destinationAddress)
+        {
+            return IPHelperWrapper.TryGetInterfaceNameForDestination(destinationAddress);
+        }
+
         public static int GetNetworkInterfaceIndex(string name) 
         {
             return FindNetworkInterface(name).GetIPProperties().GetIPv4Properties().Index;

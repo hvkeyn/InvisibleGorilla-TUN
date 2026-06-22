@@ -8,12 +8,12 @@ namespace InvisibleGorillaTUN.Core
 
     internal class TunWrapper
     {
-        public static void StartTunnel(string device, string proxy)
+        public static void StartTunnel(string device, string proxy, string bindInterface)
         {
             try
             {
-                DiagnosticLog.Write("TunWrapper", $"Native StartTunnel call: device={device}, proxy={proxy}");
-                StartTunnelNative(device, proxy);
+                DiagnosticLog.Write("TunWrapper", $"Native StartTunnel call: device={device}, proxy={proxy}, bindInterface={bindInterface}");
+                StartTunnelNative(device, proxy, bindInterface);
                 DiagnosticLog.Write("TunWrapper", "Native StartTunnel returned");
             }
             catch (Exception ex)
@@ -23,7 +23,7 @@ namespace InvisibleGorillaTUN.Core
             }
 
             [DllImport(Path.TUN_DLL, EntryPoint = "StartTunnel")]
-            static extern void StartTunnelNative(string device, string proxy);
+            static extern void StartTunnelNative(string device, string proxy, string bindInterface);
         }
 
         public static void StopTunnel()

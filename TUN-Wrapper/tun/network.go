@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os/exec"
 	"strconv"
+	"strings"
 )
 
 //export SetInterfaceAddress
@@ -41,6 +42,11 @@ func SetRoutes(server *C.char, address *C.char, gateway *C.char, index int) {
 	addr := C.GoString(address)
 	gw := C.GoString(gateway)
 	ifIndex := strconv.Itoa(index)
+
+	if strings.TrimSpace(gw) == "" {
+		fmt.Println("error | SetRoutes: physical gateway is empty")
+		return
+	}
 
 	// Reach the VPN server directly through the physical gateway so the tunnel's own
 	// packets are not routed back into the tunnel (which would kill connectivity).
