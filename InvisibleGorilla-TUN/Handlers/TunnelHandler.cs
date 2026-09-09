@@ -171,7 +171,7 @@ namespace InvisibleGorillaTUN.Handlers
                 DiagnosticLog.Write("TunnelHandler", $"Waiting until interface exists: {device}");
                 scheduler.WaitUntil(
                     condition: IsInterfaceExists,
-                    millisecondsTimeout: 6000,
+                    millisecondsTimeout: 20000,
                     $"Device with the name '{device}' was not found."
                 );
                 DiagnosticLog.Write("TunnelHandler", $"Interface exists: {device}");
@@ -189,7 +189,7 @@ namespace InvisibleGorillaTUN.Handlers
                 DiagnosticLog.Write("TunnelHandler", $"Waiting until interface address is set: {address}");
                 scheduler.WaitUntil(
                     condition: IsInterfaceAddressWasSet,
-                    millisecondsTimeout: 6000,
+                    millisecondsTimeout: 15000,
                     $"'{address}' was not set to '{device}' device."
                 );
                 DiagnosticLog.Write("TunnelHandler", $"Interface address confirmed: {address}");

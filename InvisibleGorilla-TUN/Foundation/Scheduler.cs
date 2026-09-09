@@ -7,22 +7,21 @@ namespace InvisibleGorillaTUN.Foundation
     {
         public void WaitUntil(Func<bool> condition, int millisecondsTimeout, string timeoutError)
         {
-            bool isConditionSatisfied = false;
-            int timeRate = millisecondsTimeout / 20;
+            if (condition.Invoke())
+                return;
 
-            for (int i = 0; i < 20; i++)
+            const int sliceMs = 100;
+            int elapsed = 0;
+            while (elapsed < millisecondsTimeout)
             {
-                Thread.Sleep(timeRate);
+                Thread.Sleep(sliceMs);
+                elapsed += sliceMs;
 
                 if (condition.Invoke())
-                {
-                    isConditionSatisfied = true;
-                    break;
-                }
+                    return;
             }
 
-            if (!isConditionSatisfied)
-                throw new Exception(timeoutError);
+            throw new Exception(timeoutError);
         }
     }
 }
